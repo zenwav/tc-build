@@ -1,5 +1,106 @@
 # Toolchain build scripts
 
+The main purpose of this script is to compile the patched AOSP clang source code in a more standardized way. Why is this needed? When compiling the Android kernel on ARM64 devices (e.g., in LXC/chroot/proot environments or ARM-based computers like Mac M1), there are no compatible compilers available, as existing toolchains are designed for x86 platforms.
+
+For compiling standard Linux kernels, using Ubuntu's built-in gcc and clang is generally fine. However, the Android kernel is different. The Android kernel undergoes multiple modifications (by Google, Qualcomm, and phone manufacturers), which makes it non-standard. Using generic compilers often leads to errors, warnings, boot failures, or other issues. To address this, Google developed AOSP Clang, which involves pulling LLVM source code, creating an initial compiler, testing the kernel and compiler, patching the compiler for errors, and repeating the process (e.g., clang 487747 has 111 patches).
+
+In short, this script is used to standardize the compilation of patched AOSP clang source code on arm64 devices (phones, Raspberry Pi, Mac M1, etc.) under Linux/LXC/chroot/proot environments. The resulting toolchain closely resembles the official AOSP Clang, though full parity with the x86 version is unachievable without Google’s official ARM64 support.
+
+**Usage (for LXC/chroot/proot environments on phones):**
+
+1.  Clone this project. Note that this script is only suitable for newer clang versions, e.g., Clang 16.
+
+    ```bash
+    git clone -b new https://github.com/zenwav/tc-build.git tc-build
+    ```
+
+    ```bash
+    cd ./tc-build/src/
+    ```
+
+    ```bash
+    git clone https://android.googlesource.com/toolchain/llvm-project
+    ```
+
+    ```bash
+    git clone https://android.googlesource.com/toolchain/llvm_android
+    ```
+2. Checkout specific Commits and Apply Patches:
+    Then, refer to this [link](https://android.googlesource.com/platform/prebuilts/clang/host/linux-x86/+/refs/heads/main), specifically the `manifest_xxxxx.xml` of the actually compiled x64 toolchain. Use `git checkout` to check out the corresponding commits, and similarly, check out the corresponding commits in `llvm_android`. Then apply the patches to `llvm-project` and compile. Take `clang-r530567` as an example.
+
+    ```bash
+    cd llvm-project
+    ```
+
+    ```bash
+    git checkout 97a699bf4812a18fb657c2779f5296a4ab2694d2
+    ```
+
+    ```bash
+    cd ..
+    ```
+
+    ```bash
+    cd llvm_android
+    ```
+
+    ```bash
+    git checkout ab3ade05b26c45b59ac47b3779b7a6c999e6d634
+    ```
+
+    ```bash
+    cp -R ./patches/*.patch ../llvm-project/
+    ```
+
+    ```bash
+    cp -R ./patches/cherry/*.patch ../llvm-project/
+    ```
+
+    ```bash
+    cd ../llvm-project/
+    ```
+
+    ```bash
+    # Apply all patches
+    for file in *.patch; do patch -p1 < $file; done  
+    ```
+
+    ```bash
+    cd ..
+    ```
+
+    ```bash
+    chmod +x build.sh
+    ```
+
+    ```bash
+    ./build.sh
+    ```
+
+3. Packaging (example on a Samsung S10 with Snapdragon 855 in LXC/Ubuntu 22.04):
+After compilation (took ~1h44m), the toolchain is installed at `/home/user/Toolchains/clang-r498229b`.
+
+    ```bash
+    cd /home/user/Toolchains
+    ```
+
+    ```bash
+    XZ_OPT="-9" tar --warning=no-file-changed -cJf clang-r530567.tar.xz clang-r530567
+    ```
+
+    Or, install the multi-threaded packaging tool `pixz`:
+
+    ```bash
+    apt install pixz
+    ```
+
+    ```bash
+    tar -I pixz -cf clang-r530567.tar.xz clang-r530567
+    ```
+## Credits
+This translation is based on the original Chinese guide authored by tomxi1997. The original guide can be found at [build-aosp-clang-for-arm64](https://github.com/tomxi1997/build-aosp-clang-for-arm64).
+
+
 There are times where a tip of tree LLVM build will have some issue fixed and it isn't available to you, maybe because it isn't in a release or it isn't available through your distribution's package management system. At that point, to get that fix, LLVM needs to be compiled, which sounds scary but is [rather simple](https://llvm.org/docs/GettingStarted.html). The `build-llvm.py` script takes it a step farther by trying to optimize both LLVM's build time by:
 
 * Trimming down a lot of things that kernel developers don't care about:
