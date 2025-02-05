@@ -77,7 +77,7 @@ In short, this script is used to standardize the compilation of patched AOSP cla
     cd ..
     ```
 
-    ``bash
+    ```bash
     python3 /home/ubuntu/tc-build/src/toolchain-utils/llvm_tools/patch_manager.py \
             --svn_version 530567 \
             --patch_metadata_file /home/ubuntu/tc-build/src/llvm_android/patches/PATCHES.json \
