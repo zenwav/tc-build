@@ -15,7 +15,7 @@ In short, this script is used to standardize the compilation of patched AOSP cla
     ```
 
     ```bash
-    cd ./tc-build/src/
+    cd tc-build/src/
     ```
 
     ```bash
@@ -25,8 +25,17 @@ In short, this script is used to standardize the compilation of patched AOSP cla
     ```bash
     git clone https://android.googlesource.com/toolchain/llvm_android
     ```
+
+    ```bash
+    git clone https://android.googlesource.com/toolchain/binutils
+    ```
+
+    ```bash
+    git clone https://android.googlesource.com/platform/external/toolchain-utils
+    ```
+    
 2. Checkout specific Commits and Apply Patches:
-    Then, refer to this [link](https://android.googlesource.com/platform/prebuilts/clang/host/linux-x86/+/refs/heads/main), specifically the `manifest_xxxxx.xml` of the actually compiled x64 toolchain. Use `git checkout` to check out the corresponding commits, and similarly, check out the corresponding commits in `llvm_android`. Then apply the patches to `llvm-project` and compile. Take `clang-r530567` as an example.
+    Then, refer to this [link](https://android.googlesource.com/platform/prebuilts/clang/host/linux-x86/+/refs/heads/main), specifically the `manifest_xxxxx.xml` of the actually compiled x64 toolchain. Use `git checkout` to check out the corresponding commits, and similarly, check out the corresponding commits in `llvm_android`, `binutils`, and `toolchain-utils`. Then apply the patches to `llvm-project` and compile. Take `clang-r530567` as an example.
 
     ```bash
     cd llvm-project
@@ -49,20 +58,31 @@ In short, this script is used to standardize the compilation of patched AOSP cla
     ```
 
     ```bash
-    cp -R ./patches/*.patch ../llvm-project/
+    cd toolchain-utils
     ```
 
     ```bash
-    cp -R ./patches/cherry/*.patch ../llvm-project/
+    git checkout dd1ee45a84cb07337f9d5d0a6769d9b865c6e620
     ```
 
     ```bash
-    cd ../llvm-project/
+    cd binutils
     ```
 
     ```bash
-    # Apply all patches
-    for file in *.patch; do patch -p1 < $file; done  
+    git checkout c19795e958ed532462948fd14b1bdfd4f6e96e03
+    ```
+
+    ```bash
+    cd ..
+    ```
+
+    ``bash
+    python3 /home/ubuntu/tc-build/src/toolchain-utils/llvm_tools/patch_manager.py \
+            --svn_version 530567 \
+            --patch_metadata_file /home/ubuntu/tc-build/src/llvm_android/patches/PATCHES.json \
+            --src_path /home/ubuntu/tc-build/src/llvm-project \
+            --failure_mode fail
     ```
 
     ```bash
@@ -70,18 +90,22 @@ In short, this script is used to standardize the compilation of patched AOSP cla
     ```
 
     ```bash
-    chmod +x build.sh
+    chmod +x build.sh build-aosp-clang.sh
     ```
 
     ```bash
     ./build.sh
     ```
-
-3. Packaging (example on a Samsung S10 with Snapdragon 855 in LXC/Ubuntu 22.04):
-After compilation (took ~1h44m), the toolchain is installed at `/home/user/Toolchains/clang-r498229b`.
+-OR-
 
     ```bash
-    cd /home/user/Toolchains
+    ./build-aosp-clang.sh
+    ```
+
+3. Packaging
+
+    ```bash
+    cd /home/ubuntu/Toolchains
     ```
 
     ```bash
@@ -98,7 +122,7 @@ After compilation (took ~1h44m), the toolchain is installed at `/home/user/Toolc
     tar -I pixz -cf clang-r530567.tar.xz clang-r530567
     ```
 ## Credits
-This translation is based on the original Chinese guide authored by tomxi1997. The original guide can be found at [build-aosp-clang-for-arm64](https://github.com/tomxi1997/build-aosp-clang-for-arm64).
+Based on the original Chinese guide authored by tomxi1997. The original guide can be found at [build-aosp-clang-for-arm64](https://github.com/tomxi1997/build-aosp-clang-for-arm64).
 
 
 There are times where a tip of tree LLVM build will have some issue fixed and it isn't available to you, maybe because it isn't in a release or it isn't available through your distribution's package management system. At that point, to get that fix, LLVM needs to be compiled, which sounds scary but is [rather simple](https://llvm.org/docs/GettingStarted.html). The `build-llvm.py` script takes it a step farther by trying to optimize both LLVM's build time by:
