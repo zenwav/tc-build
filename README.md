@@ -97,8 +97,7 @@ In short, this script is used to standardize the compilation of patched AOSP cla
     ./build.sh
     ```
 -OR-
-
-    ```bash
+    ```
     ./build-aosp-clang.sh
     ```
 
