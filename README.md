@@ -29,6 +29,10 @@ In short, this script is used to standardize the compilation of patched AOSP cla
     ```bash
     git clone https://android.googlesource.com/toolchain/binutils
     ```
+
+    ```bash
+    git clone https://android.googlesource.com/platform/external/toolchain-utils
+    ```
     
 2. Checkout specific Commits and Apply Patches:
     Then, refer to this [link](https://android.googlesource.com/platform/prebuilts/clang/host/linux-x86/+/refs/heads/main), specifically the `manifest_xxxxx.xml` of the actually compiled x64 toolchain. Use `git checkout` to check out the corresponding commits, and similarly, check out the corresponding commits in `llvm_android`, `binutils`, and `toolchain-utils`. Then apply the patches to `llvm-project` and compile. Take `clang-r530567` as an example.
@@ -51,6 +55,14 @@ In short, this script is used to standardize the compilation of patched AOSP cla
 
     ```bash
     git checkout ab3ade05b26c45b59ac47b3779b7a6c999e6d634
+    ```
+
+    ```bash
+    cd toolchain-utils
+    ```
+
+    ```bash
+    git checkout dd1ee45a84cb07337f9d5d0a6769d9b865c6e620
     ```
 
     ```bash
