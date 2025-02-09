@@ -68,6 +68,10 @@ In short, this script is used to standardize the compilation of patched AOSP cla
     ```bash
     git checkout dd1ee45a84cb07337f9d5d0a6769d9b865c6e620
     ```
+    
+    ```bash
+    cd ..
+    ``` 
 
     ```bash
     cd binutils
