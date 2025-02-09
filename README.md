@@ -56,6 +56,10 @@ In short, this script is used to standardize the compilation of patched AOSP cla
     ```bash
     git checkout ab3ade05b26c45b59ac47b3779b7a6c999e6d634
     ```
+    
+    ```bash
+    cd ..
+    ```
 
     ```bash
     cd toolchain-utils
