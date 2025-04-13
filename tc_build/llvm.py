@@ -277,6 +277,7 @@ class LLVMBuilder(Builder):
             self.cmake_defines['COMPILER_RT_BUILD_GWP_ASAN'] = 'OFF'
         if self.cmake_defines['CMAKE_BUILD_TYPE'] == 'Release':
             self.cmake_defines['LLVM_ENABLE_WARNINGS'] = 'OFF'
+            self.cmake_defines['LLVM_INCLUDE_TESTS'] = 'OFF'
         if self.tools.llvm_tblgen:
             self.cmake_defines['LLVM_TABLEGEN'] = self.tools.llvm_tblgen
         self.cmake_defines['LLVM_TARGETS_TO_BUILD'] = ';'.join(self.targets)
