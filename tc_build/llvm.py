@@ -482,6 +482,10 @@ class LLVMSlimBuilder(LLVMBuilder):
         if build_compiler_rt:
             self.cmake_defines.update(slim_compiler_rt_defines)
 
+        mlgo_base = self.folders.source.parent / 'mlgo-models'  # src/mlgo-models
+        self.cmake_defines['LLVM_RAEVICT_MODEL_PATH'] = str(mlgo_base / 'arm64/regalloc/model')
+        self.cmake_defines['LLVM_INLINER_MODEL_PATH'] = str(mlgo_base / 'arm64/inline/model')
+
         super().configure()
 
 

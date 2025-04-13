@@ -8,6 +8,7 @@ import textwrap
 import time
 
 import tc_build.utils
+import subprocess
 
 from tc_build.llvm import LLVMBootstrapBuilder, LLVMBuilder, LLVMInstrumentedBuilder, LLVMSlimBuilder, LLVMSlimInstrumentedBuilder, LLVMSourceManager
 from tc_build.kernel import KernelBuilder, LinuxSourceManager, LLVMKernelBuilder
@@ -413,9 +414,36 @@ args = parser.parse_args()
 # Start tracking time that the script takes
 script_start = time.time()
 
+MLGO_MODEL_URLS = {
+    'arm64/regalloc': 'https://github.com/dakkshesh07/mlgo-linux-kernel/releases/download/regalloc-evict-v6.6.8-arm64-1/regalloc-evict-linux-v6.6.8-arm64-1.tar.zst',
+    'arm64/inline': 'https://android.googlesource.com/platform/prebuilts/clang/host/linux-x86/+archive/refs/heads/main/mlgo-models/arm64/inlining-Oz-chromium.tar.gz',
+}
+
+def download_mlgo_models(src_folder: Path):
+    mlgo_dir = src_folder / 'mlgo-models' 
+    mlgo_dir.mkdir(parents=True, exist_ok=True)
+
+    for model_path, url in MLGO_MODEL_URLS.items():
+        model_dir = mlgo_dir / model_path
+        if model_dir.exists():
+            continue  # Skip if already downloaded
+
+        model_dir.mkdir(parents=True, exist_ok=True)
+        tc_build.utils.print_header(f"Downloading MLGO model: {model_path}")
+
+        tarball = model_dir / 'model.tar.gz'
+        subprocess.run(['curl', '-LSs', '-o', tarball, url], check=True)
+
+        # Extract the tarball
+        subprocess.run(['tar', '-xf', tarball, '-C', model_dir], check=True)
+        tarball.unlink()  # Clean up
+
+
 # Folder validation
 tc_build_folder = Path(__file__).resolve().parent
 src_folder = Path(tc_build_folder, 'src')
+
+download_mlgo_models(src_folder)
 
 if args.build_folder:
     build_folder = Path(args.build_folder).resolve()
